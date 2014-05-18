@@ -1,0 +1,338 @@
+<!--
+This is functional.
+I wanted to give a more recent project im working on but
+it is nowhere near a finished product. Many of the things
+I do with javascript could have been slimmed down using jquery
+but I chose pure javascript in those cases.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>canvas stuff</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" type="text/css" href="gui.css"/>
+        <script src ="jquery-1.10.2.js"></script>
+        <script>
+            var c;
+            var ctx;
+            var Mouse;
+            var pCount = 0;
+            var lCount = 0;
+            var cCount = 0;
+            var polyCount = 0;
+            var triCount = 0;
+            var arcCount  = 0;
+            var horRange = document.getElementById("hor");
+            var vertRange = document.getElementById("vert");
+            
+            window.onload=function(){
+            c = document.getElementById("myCanvas");
+            ctx = c.getContext("2d");
+            alert("Click the canvas to prepare coordinates");
+            };
+            function plot(){
+                /*
+                 * this function does all the drawing of the shapes and
+                 * set most of the events used in the script
+                 */
+                var shape = document.getElementById("shape").value;
+                var pTab = document.getElementById("poi");
+                var lTab = document.getElementById("lin");
+                var cTab = document.getElementById("cir");
+                var polTab = document.getElementById("pol");
+                var triTab = document.getElementById("tri");
+                var arcTab = document.getElementById("arc");
+                var row;
+                var cell;
+                switch(shape){
+                    
+                    case "point":
+                        ctx.beginPath();
+                        ctx.arc( Mouse.x, Mouse.y, 1, 0, 2 * Math.PI );
+                        ctx.stroke();
+                        row = pTab.insertRow(pCount + 1);
+                        cell = row.insertCell(0);
+                        pCount = pCount + 1;
+                        cell.innerHTML = pCount + "." + "(" + Mouse.x + ", " + Mouse.y + ")";
+                        cell.onclick = function(){
+                            var eChoise = confirm("Edit This?");
+                            var parseShape = this.innerHTML;
+                            var numbs = parseShape.match(/\d+/g);
+                            var clickedCell = this;
+                            alert(parseShape);
+                            if(eChoise == true){
+                                /*
+                                 * If a point is chosen to be edited then the sliders are
+                                 * enabled and so are the arrow buttons
+                                 */
+                                $('input').each(function() {
+                                    if ($(this).attr('disabled')) {
+                                        $(this).removeAttr('disabled');
+                                        }
+                                });
+                                $('#hor').change(function(){
+                                    eraseIt(numbs[1],numbs[2]);
+                                    //alert(20 - parseInt($(this).val()));
+                                    var move = ((20 - parseInt($(this).val())) / 20) * 400;
+                                
+                                    numbs[1] = move;
+                                
+                                    ctx.beginPath();
+                                    ctx.arc( numbs[1], numbs[2], 1, 0, 2 * Math.PI );
+                                    ctx.stroke();
+                                    clickedCell.innerHTML = numbs[0] + "." + "(" + numbs[1] + ", " + numbs[2] + ")";
+                                });
+                            
+                                $('#vert').change(function(){
+                               eraseIt(numbs[1],numbs[2]);
+                                    var move = ((20 - parseInt($(this).val())) / 20) * 400;
+                                    numbs[2] = move;
+                                    ctx.beginPath();
+                                    ctx.arc( numbs[1], numbs[2], 1, 0, 2 * Math.PI );
+                                    ctx.stroke();
+                                    clickedCell.innerHTML = numbs[0] + "." + "(" + numbs[1] + ", " + numbs[2] + ")";
+                            });
+                            
+                            document.getElementById("up").onclick = function(){
+                                    eraseIt(numbs[1],numbs[2]);
+                                    if(numbs[2] != 0)
+                                    numbs[2]--;
+                                    ctx.beginPath();
+                                    ctx.arc( numbs[1], numbs[2], 1, 0, 2 * Math.PI );
+                                    ctx.stroke();
+                                    clickedCell.innerHTML = numbs[0] + "." + "(" + numbs[1] + ", " + numbs[2] + ")";
+                            };
+                            
+                            document.getElementById("down").onclick = function(){
+                                    eraseIt(numbs[1],numbs[2]);
+                                    if(numbs[2] != 400)
+                                    numbs[2]++;
+                                    ctx.beginPath();
+                                    ctx.arc( numbs[1], numbs[2], 1, 0, 2 * Math.PI );
+                                    ctx.stroke();
+                                    clickedCell.innerHTML = numbs[0] + "." + "(" + numbs[1] + ", " + numbs[2] + ")";
+                            };
+                            
+                            document.getElementById("left").onclick = function(){
+                                    eraseIt(numbs[1],numbs[2]);
+                                    if(numbs[1] != 0)
+                                    numbs[1]--;
+                                    ctx.beginPath();
+                                    ctx.arc( numbs[1], numbs[2], 1, 0, 2 * Math.PI );
+                                    ctx.stroke();
+                                    clickedCell.innerHTML = numbs[0] + "." + "(" + numbs[1] + ", " + numbs[2] + ")";
+                            };
+                            
+                            document.getElementById("right").onclick = function(){
+                                    eraseIt(numbs[1],numbs[2]);
+                                    if(numbs[1] != 400)
+                                    numbs[1]++;
+                                    ctx.beginPath();
+                                    ctx.arc( numbs[1], numbs[2], 1, 0, 2 * Math.PI );
+                                    ctx.stroke();
+                                    clickedCell.innerHTML = numbs[0] + "." + "(" + numbs[1] + ", " + numbs[2] + ")";
+                            };
+                            }
+                            
+                        };
+                    break;
+                    case "line":
+                        alert("Now You Will Specify The End Point Of The Line(by clicking)");
+                        //var endX = prompt("Specify x",50);
+                        //var endY = prompt("Specify y",50);
+                        var oldx = Mouse.x;
+                        var oldy = Mouse.y;
+                        while(oldx == Mouse.x && oldy == Mouse.y)
+                            setTimeout(function(){},1000);
+                        ctx.beginPath();
+                        ctx.moveTo(oldx,oldy);
+                        ctx.lineTo(Mouse.x,Mouse.y);
+                        ctx.stroke();
+                        row = lTab.insertRow(lCount + 1);
+                        cell = row.insertCell(0);
+                        lCount++;
+                        cell.innerHTML = lCount + "." + "(" + Mouse.x + "," + Mouse.y + ")" + " to " + "(" + endX + "," + endY + ")";
+                    break;
+                    case "circle":
+                        var rad = prompt("Enter Circle Radius",50);
+                        ctx.beginPath();
+                        ctx.arc( Mouse.x, Mouse.y, rad, 0, 2 * Math.PI);
+                        ctx.stroke();
+                        row = cTab.insertRow(cCount + 1);
+                        cell = row.insertCell(0);
+                        cCount++;
+                        cell.innerHTML = cCount + "." + "origion(" + Mouse.x + "," + Mouse.y + ")" + " radius = " + rad;
+                    break;
+                    case "tri":
+                        //an attempt at triangle manipulation..just add three click functionality
+                        //var triPer = prompt("Enter The Triangle's second point x and y", 120);
+                        ctx.beginPath();
+                        
+                        ctx.moveTo(Mouse.x,Mouse.y - 100);
+                        ctx.lineTo(Mouse.x + 100,Mouse.y + 100);
+                        //ctx.moveTo(Mouse.x - 100,Mouse.y - 100);
+                        ctx.lineTo(Mouse.x - 100,Mouse.y + 100);
+                        ctx.lineTo(Mouse.x,Mouse.y - 100);
+                        ctx.stroke();
+                        row = triTab.insertRow(triCount + 1);
+                        cell = row.insertCell(0);
+                        triCount++;
+                        cell.innerHTML = triCount + "." + "point of origion = (" + Mouse.x + "," + Mouse.y + ")";
+                    break;
+                    case "poly":
+                        ctx.beginPath();
+                        ctx.moveTo(Mouse.x - 50, Mouse.y - 50);
+                        ctx.lineTo(Mouse.x + 50,Mouse.y - 50);
+                        ctx.lineTo(Mouse.x + 80,Mouse.y + 50);
+                        ctx.lineTo(Mouse.x - 80,Mouse.y + 50);
+                        ctx.lineTo(Mouse.x - 50,Mouse.y - 50);
+                        ctx.stroke();
+                        ctx.fillStyle="#FF0000";
+                        ctx.fill();
+                        row = polTab.insertRow(polyCount + 1);
+                        cell = row.insertCell(0);
+                        polyCount++;
+                        cell.innerHTML = polyCount + "." + "point of origion = (" + Mouse.x + "," + Mouse.y + ")";
+                    break;
+                    case "arc":
+                        var StartDeg = prompt("Enter Your Starting Angle",30);
+                        var EndingDeg = prompt("Enter Your Ending Angle",2 * Math.PI);
+                        var rad = prompt("Enter Arc Radius",50);
+                        ctx.beginPath();
+                        ctx.arc( Mouse.x, Mouse.y, rad, -(StartDeg * Math.PI)/180, (EndingDeg * Math.PI)/180, true);
+                        ctx.stroke();
+                        row = arcTab.insertRow(arcCount + 1);
+                        cell = row.insertCell(0);
+                        arcCount++;
+                        cell.innerHTML = arcCount + "." + "Origion(" + Mouse.x + "," + Mouse.y + ")" + " Radius = " + rad + "Starting at:" + StartDeg + " and Ending at:" + EndingDeg;
+                    break;
+                }
+                
+            }
+            function getMousePos(canvas, evt) {
+                /*
+                 * Gets the mouse's position on the canvas by getting
+                 * its position on the page and adjusting it based
+                 * on the canvas positon
+                 */
+                 var rect = canvas.getBoundingClientRect();
+                 return {
+                  x: evt.clientX - rect.left,
+                  y: evt.clientY - rect.top
+                 };
+                }
+            function prep(event){
+                Mouse = getMousePos(c, event);
+            }
+            function eraseIt(x,y){
+                //use multiple stroks to better erase a point
+                //without using clearRect()
+                ctx.strokeStyle = "white";
+                ctx.beginPath();
+                ctx.arc( x, y, 1, 0, 2 * Math.PI );
+                ctx.stroke();
+                ctx.stroke();
+                ctx.stroke();
+                ctx.stroke();
+                ctx.stroke();
+                ctx.strokeStyle = "black";
+            }
+        </script>
+    </head>
+    <body>
+        <canvas id="myCanvas" width="400" height="400" onclick="prep(event)" style="border:1px solid #d3d3d3;">
+            Your browser does not support the canvas element</canvas>
+        
+        <div id="gui">
+            <table>
+                <tr>
+                    <td>
+                        <label>Shape:</label>
+                        <select id="shape">
+  <option value="point">Point</option>
+  <option value="line">Line</option>
+  <option value="circle">Circle</option>
+  <option value="tri">Triangle</option>
+  <option value="poly">Polygon</option>
+  <option value="arc">Arc</option>
+                        </select>
+                    </td>
+                    <td>
+                        <label>Style:</label>
+                        <select>
+  <option value="solid">Solid</option>
+  <option value="dot">Dotted</option>
+  <option value="dash">Dashed</option>
+                        </select>
+                    </td>
+                    <td>
+                        <table style="border: 1px solid #000">
+                            <tr>
+                                <td></td>
+                                <td><button id="up"><img alt="UP" src="up.gif"/></button></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td><button id="left"><img alt="LEFT" src="left.gif"/></button></td>
+                                <td><button id="draw" onclick="plot()">Draw!</button></td>
+                                <td><button id="right"><img alt="RIGHT" src="right.gif"/></button></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><button id="down"><img alt="DOWN" src="down.gif"/></button></td>
+                                <td></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td><table id="poi" style="border: 1px solid #000">
+                            <tr>
+                            <th>Points:</th>
+                            </tr>
+                        </table></td>
+                    <td>
+                        <table id="lin" style="border: 1px solid #000">
+                            <tr>
+                            <th>Lines:</th>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table id="cir" style="border: 1px solid #000">
+                            <tr>
+                            <th>Circles:</th>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <table id="tri" style="border: 1px solid #000">
+                            <tr>
+                            <th>Triangles:</th>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table id="pol" style="border: 1px solid #000">
+                            <tr>
+                            <th>Polygons:</th>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table id="arc" style="border: 1px solid #000">
+                            <tr>
+                            <th>Arcs:</th>
+                            </tr>
+                        </table>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+            <input id="vert" type="range" min="0" max="20" value="10" style="float: right;" disabled/>
+        </div>
+        <input id="hor" type="range" min="0" max="20" value="10" disabled/>
+    </body>
+</html>

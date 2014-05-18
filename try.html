@@ -1,0 +1,236 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+
+<HTML>
+<HEAD>
+<TITLE>Unscramble Table Cells Game</TITLE>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=iso-8859-1">
+<META NAME="AUTHOR" CONTENT="InetSDK">
+<META NAME="MS.LOCALE" CONTENT="EN-US">
+<META NAME="ROBOTS" CONTENT="noindex">
+
+<!-- SAMPLE_STYLE_START -->
+<LINK REL="stylesheet" HREF="/workshop/samples/samples.css" TYPE="text/css">
+<!-- SAMPLE_STYLE_END -->
+
+<STYLE type="text/css">
+  TD { padding:2px; text-align:center; }
+  IMG { width:81px; height:46px; cursor:hand; }
+</STYLE>
+</HEAD>
+<!--TOOLBAR_START-->
+<!--TOOLBAR_EXEMPT-->
+<!--TOOLBAR_END-->
+
+<BODY>
+<DIV class="body">
+<!-- CONTENTS_START -->
+<BLOCKQUOTE>
+<H2>The Unscramble Table Cells Game</H2>
+<B>Instructions</B>: Click a puzzle piece to select it. If you click the wrong piece, click it again to deselect it. Click a second puzzle piece to swap it with the selected piece.<BR><BR>
+<DIV ALIGN="center">
+<TABLE ID=oTable>
+</TABLE>
+<BR>
+Number of swaps: <SPAN ID=numSwaps>0</SPAN><BR><BR>
+<SPAN ID=winnerText></SPAN><BR><BR>
+<INPUT TYPE="button" VALUE="Scramble" onClick="scrambleCells();">
+</DIV>
+</BLOCKQUOTE>
+
+<SCRIPT LANGUAGE="JavaScript">
+var lastSelection = null;
+var nSwaps = 0;
+
+window.onload = fnInit;
+
+function fnInit()
+{
+  var oRow;
+  var iRow, iCol;
+
+  for (iRow = 0; iRow < 3; iRow++) {
+	oRow = oTable.insertRow(-1);
+    for (iCol = 0; iCol < 3; iCol++) {
+	  oRow.insertCell(-1);
+    }
+  }
+ 
+  scrambleCells();
+}
+
+function getRandom(maxValue) {
+  // Create an instance of the current date.
+  var now = new Date();
+
+  // Create a random number.
+  var num = now.getTime() * now.getSeconds() * Math.random();
+
+  // Cut random number to an integer value between 0 and maxValue, inclusive.
+  return Math.round(num % maxValue);
+}
+
+function scrambleCells()
+{
+  var arr, nIndex, nRnd, arrCount, bFound, iRow, iCol;
+
+  arr = new Array(9);
+    
+  // Fill the array with values from 0 - 8 in a random order.
+  for (nIndex = 0; nIndex < 9; nIndex++) {
+    bFound = 1;
+
+	// Generate a random integer value from 0 - 8.
+    while (bFound == 1) {
+      bFound = 0;
+      nRnd = getRandom(8);
+
+      // Go back through the array and make sure the number isn't already there.
+      for (arrCount = nIndex; arrCount >= 0; arrCount--) {
+        if (arr[arrCount] == nRnd) {
+          bFound = 1;  // Oops!  Found it, try again.
+        } // end if
+      }  // end for
+
+    }  // end while
+
+    arr[nIndex] = nRnd;
+
+  }  // end for
+
+  // Populate the table
+  nIndex = 0;
+  for (iRow = 0; iRow < 3; iRow++) {
+    theRow = oTable.rows[iRow];
+	for (iCol = 0; iCol < 3; iCol++) {
+      theRow.cells[iCol].innerHTML = "Ni3 hao3"
+	  nIndex++;
+    }
+  }
+
+  // Separate all the cells in case there was a winner in the last game.
+  oTable.style.borderCollapse = "";
+  for (iRow = 0; iRow < 3; iRow++) {
+  	for (iCol = 0; iCol < 3; iCol++) {
+      oTable.rows[iRow].cells[iCol].style.padding = "2px";
+    } // end for
+  }  // end for
+
+  winnerText.innerText = "";
+  nSwaps = 0;
+  numSwaps.innerText = nSwaps;
+}
+
+function onclickCell()
+{
+  var e, c;
+  
+  // Do not accept clicks if there's been a winner.
+  if (winnerText.innerText != "") {
+    window.event.cancelBubble = true;
+	return;
+  }
+  
+  e = window.event.srcElement;
+  c = findCell(e);
+
+  if (c != null) {
+    if (lastSelection == null) {
+      selectCell(c);
+      lastSelection = c;
+	}
+	else {
+	  if (c == lastSelection) {
+	    deselectCell(lastSelection);
+	  }
+	  else {
+	    c.swapNode(lastSelection);
+        deselectCell(lastSelection);
+	    nSwaps += 1;
+	    numSwaps.innerText = nSwaps;
+		checkWinner();
+	  }
+	  lastSelection = null;
+    }
+  }
+  window.event.cancelBubble = true;
+} 
+
+function findCell(e)
+{
+  if (e.tagName == "TD") {
+    return e;
+  }
+  else if (e.tagName == "BODY") {
+    return null;
+  }
+  else {
+    return findCell(e.parentElement);
+  }
+}
+
+function selectCell(c)
+{
+  c.style.backgroundColor = "red";
+  c.style.color = "white";
+}
+
+function cancelSelect()
+{
+  if (lastSelection != null) {
+    deselectCell(lastSelection);
+    lastSelection = null;
+  }
+}
+
+function deselectCell(c)
+{
+  c.style.backgroundColor = "white";
+  c.style.color = "white";
+}
+
+function checkWinner()
+{
+  var bWinner = 1;  // Assume we have a winner.
+  var nIndex = 0;
+  
+  for (iRow = 0; iRow < 3; iRow++) {
+    var theRow = oTable.rows.item(iRow);
+	for (iCol = 0; iCol < 3; iCol++) {
+      var sFilename = theRow.cells.item(iCol).innerHTML;
+	  sFilename = sFilename.substring(sFilename.length - 7, sFilename.length - 6);
+      if (sFilename != nIndex) {
+	    bWinner = 0;  // Had a mismatch, no winner.
+	  }
+	  nIndex++;
+    }
+  }
+  
+  if (bWinner == 1) {
+    // Display the winner text.
+    winnerText.innerHTML="<font color='red'><b>Winner!!!</b></font><br><br>Click the Scramble button to play again.";
+
+	// Combine the image pieces together, just to look cool for the winner.
+	oTable.style.borderCollapse = "collapse";
+    for (iRow = 0; iRow < 3; iRow++) {
+  	  for (iCol = 0; iCol < 3; iCol++) {
+  	    oTable.rows[iRow].cells[iCol].style.padding = "0";
+      } // end for
+    }  // end for
+    
+  }  // end if
+}
+
+oTable.onclick = onclickCell;
+document.onclick = cancelSelect;
+</SCRIPT>
+<!-- CONTENTS_END -->
+
+<!-- START_PAGE_FOOTER -->
+<BR><BR><BR>
+</DIV>
+</BODY>
+</HTML>

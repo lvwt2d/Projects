@@ -1,0 +1,766 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" type="text/css" href="gui.css"/>
+        <script src ="jquery-1.10.2.js"></script>
+        <script src="lupload.js"></script>
+        <script>
+            document.ready = function(){
+                $("#upload").lupload("https://www.umsl.edu");
+            };
+            
+            var c;
+            var ctx;
+            var Mouse;
+            var pCount = 0;
+            var lCount = 0;
+            var cCount = 0;
+            var polyCount = 0;
+            var triCount = 0;
+            var arcCount = 0;
+            var horRange = document.getElementById("hor");
+            var vertRange = document.getElementById("vert");
+
+            window.onload = function() {
+                c = document.getElementById("myCanvas");
+                ctx = c.getContext("2d");
+                alert("Click the canvas to prepare your shape's coordinates");
+            };
+            //THIS IS THE MAIN FUNCTION OF THE SCRIPT.
+            //IT WILL DRAW THE USER SPECIFIED SHAPE
+            function plot() {
+                var shape = document.getElementById("shape").value;
+                var pTab = document.getElementById("poi");
+                var lTab = document.getElementById("lin");
+                var cTab = document.getElementById("cir");
+                var polTab = document.getElementById("pol");
+                var triTab = document.getElementById("tri");
+                var arcTab = document.getElementById("arc");
+                var shpStl = document.getElementById("formStyle").value;
+                var row;
+                var cell;
+                switch (shpStl) {
+                    case "solid":
+                        ctx.setLineDash([0]);
+                        break;
+                    case "dot":
+                        ctx.setLineDash([1]);
+                        break;
+                    case "dash":
+                        ctx.setLineDash([8, 2]);
+                        break;
+                }
+                switch (shape) {
+
+                    case "point":
+
+                        ctx.beginPath();
+                        ctx.arc(Mouse.x, Mouse.y, 1, 0, 2 * Math.PI);
+                        ctx.stroke();
+                        row = pTab.insertRow(pCount + 1);
+                        cell = row.insertCell(0);
+                        pCount = pCount + 1;
+                        cell.innerHTML = pCount + "." + "(" + Mouse.x + ", " + Mouse.y + ")";
+
+                        break;
+                    case "line":
+                        alert("Now You Will Specify The End Point Of The Line");
+                        var endX = prompt("Specify x", 50);
+                        var endY = prompt("Specify y", 50);
+
+                        ctx.beginPath();
+                        ctx.moveTo(Mouse.x, Mouse.y);
+                        ctx.lineTo(endX, endY);
+                        ctx.stroke();
+                        row = lTab.insertRow(lCount + 1);
+                        cell = row.insertCell(0);
+                        lCount++;
+                        cell.innerHTML = lCount + "." + "(" + Mouse.x + "," + Mouse.y + ")" + " to " + "(" + endX + "," + endY + ")";
+                        break;
+                    case "circle":
+                        var rad = prompt("Enter Circle Radius", 50);
+                        ctx.beginPath();
+                        ctx.arc(Mouse.x, Mouse.y, rad, 0, 2 * Math.PI);
+                        ctx.stroke();
+                        row = cTab.insertRow(cCount + 1);
+                        cell = row.insertCell(0);
+                        cCount++;
+                        cell.innerHTML = cCount + "." + "origion(" + Mouse.x + "," + Mouse.y + ")" + " radius = " + rad;
+                        break;
+                    case "tri":
+                        ctx.beginPath();
+
+                        ctx.moveTo(Mouse.x, Mouse.y - 100);
+                        ctx.lineTo(Mouse.x + 100, Mouse.y + 100);
+                        ctx.lineTo(Mouse.x - 100, Mouse.y + 100);
+                        ctx.lineTo(Mouse.x, Mouse.y - 100);
+                        ctx.stroke();
+                        row = triTab.insertRow(triCount + 1);
+                        cell = row.insertCell(0);
+                        triCount++;
+                        cell.innerHTML = triCount + "." + "point of origion = (" + Mouse.x + "," + Mouse.y + ")";
+                        break;
+                    case "poly":
+                        ctx.beginPath();
+                        ctx.moveTo(Mouse.x - 50, Mouse.y - 50);
+                        ctx.lineTo(Mouse.x + 50, Mouse.y - 50);
+                        ctx.lineTo(Mouse.x + 80, Mouse.y + 50);
+                        ctx.lineTo(Mouse.x - 80, Mouse.y + 50);
+                        ctx.lineTo(Mouse.x - 50, Mouse.y - 50);
+                        ctx.stroke();
+                        row = polTab.insertRow(polyCount + 1);
+                        cell = row.insertCell(0);
+                        polyCount++;
+                        cell.innerHTML = polyCount + "." + "point of origion = (" + Mouse.x + "," + Mouse.y + ")";
+                        break;
+                    case "arc":
+                        var StartDeg = prompt("Enter Your Starting Angle", 30);
+                        var EndingDeg = prompt("Enter Your Ending Angle", 2 * Math.PI);
+                        var rad = prompt("Enter Arc Radius", 50);
+                        ctx.beginPath();
+                        ctx.arc(Mouse.x, Mouse.y, rad, -(StartDeg * Math.PI) / 180, (EndingDeg * Math.PI) / 180, true);
+                        ctx.stroke();
+                        row = arcTab.insertRow(arcCount + 1);
+                        cell = row.insertCell(0);
+                        arcCount++;
+                        cell.innerHTML = arcCount + "." + "Origion(" + Mouse.x + "," + Mouse.y + ")" + " Radius = " + rad + "Starting at:" + StartDeg + " and Ending at:" + EndingDeg;
+                        break;
+                }
+                cell.onclick = function() {
+                    var eChoise = confirm("Edit This?");
+                    var parseShape = this.innerHTML;
+                    //PULLING THE NUMBERS FROM THE CELL
+                    var numbs = parseShape.match(/\d+/g);
+                    //NOW TO CONVERT THIS STRING ARRAY TO AN INT ARRAY
+                    for (var i = 0; i < numbs.length; i++)
+                        numbs[i] = parseInt(numbs[i]);
+                    var clickedCell = this;
+                    alert(parseShape);
+                    if (eChoise == true) {
+                        alert("Hey! Dont Forget To Click The Done Button When Finished");
+
+                        $('input').each(function() {
+                            if ($(this).attr('disabled')) {
+                                $(this).removeAttr('disabled');
+                            }
+                        });
+
+                        //I parse the heading of the table of the clicked cell and 
+                        //use that to know which kind of shape to move. I then set a 
+                        //switch and case for each movement function to draw the shape
+                        var shapeStr = $(cell).parent().parent().children().eq(0).children().eq(0).html();
+                        $('#formStyle').change(function() {
+
+                            
+                            switch (shapeStr) {
+                                case "Points:":
+                                    //alert(form);
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    setUpLineStyle();
+                                    ctx.arc(numbs[1], numbs[2], 1, 0, 2 * Math.PI);
+
+                                    break;
+                                case "Lines:":
+                                    eraseIt(numbs[1], numbs[2], numbs[3], numbs[4], 0, 0, 0, shapeStr);
+                                    setUpLineStyle();
+                                    drawFig(numbs[1], numbs[2], numbs[3], numbs[4], 0, 0, 0, shapeStr);
+                                    break;
+                                case "Circles:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, numbs[3], 0, 0, shapeStr);
+                                    setUpLineStyle();
+                                    drawFig(numbs[1], numbs[2], 0, 0, numbs[3], 0, 0, shapeStr);
+                                    break;
+                                case "Triangles:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    setUpLineStyle();
+                                    drawFig(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    break;
+                                case "Polygons:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    setUpLineStyle();
+                                    drawFig(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    break;
+                                case "Arcs:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, numbs[3], numbs[4], numbs[5], shapeStr);
+                                    setUpLineStyle();
+                                    drawFig(numbs[1], numbs[2], 0, 0, numbs[3], numbs[4], numbs[5], shapeStr);
+                                    break;
+                            }
+                            
+
+                        });
+                        
+                        //HANDLES THE HORIZONTAL SLIDER
+                        $('#hor').change(function() {
+
+                            var move = ((20 - parseInt($(this).val())) / 20) * 400;
+                            move = parseInt(move);
+                            switch (shapeStr) {
+                                case "Points:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    numbs[1] = move;
+                                    ctx.beginPath();
+                                    ctx.arc(numbs[1], numbs[2], 1, 0, 2 * Math.PI);
+                                    ctx.stroke();
+                                    clickedCell.innerHTML = numbs[0] + "." + "(" + numbs[1] + ", " + numbs[2] + ")";
+                                    break;
+                                case "Lines:":
+                                    eraseIt(numbs[1], numbs[2], numbs[3], numbs[4], 0, 0, 0, shapeStr);
+                                    var diff = move - numbs[1];
+                                    numbs[1] = move;
+                                    numbs[3] += diff;
+                                    ctx.beginPath();
+                                    ctx.moveTo(numbs[1], numbs[2]);
+                                    ctx.lineTo(numbs[3], numbs[4]);
+                                    ctx.stroke();
+                                    cell.innerHTML = numbs[0] + "." + "(" + numbs[1] + "," + numbs[2] + ")" + " to " + "(" + numbs[3] + "," + numbs[4] + ")";
+                                    break;
+                                case "Circles:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, numbs[3], 0, 0, shapeStr);
+                                    numbs[1] = move;
+                                    ctx.beginPath();
+                                    ctx.arc(numbs[1], numbs[2], numbs[3], 0, 2 * Math.PI);
+                                    ctx.stroke();
+                                    clickedCell.innerHTML = numbs[0] + "." + "origion(" + numbs[1] + "," + numbs[2] + ")" + " radius = " + numbs[3];
+                                    break;
+                                case "Triangles:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    numbs[1] = move;
+                                    ctx.beginPath();
+                                    ctx.moveTo(numbs[1], numbs[2] - 100);
+                                    ctx.lineTo(numbs[1] + 100, numbs[2] + 100);
+                                    ctx.lineTo(numbs[1] - 100, numbs[2] + 100);
+                                    ctx.lineTo(numbs[1], numbs[2] - 100);
+                                    ctx.stroke();
+                                    cell.innerHTML = numbs[0] + "." + "point of origion = (" + numbs[1] + "," + numbs[2] + ")";
+                                    break;
+                                case "Polygons:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    numbs[1] = move;
+                                    ctx.beginPath();
+                                    ctx.moveTo(numbs[1] - 50, numbs[2] - 50);
+                                    ctx.lineTo(numbs[1] + 50, numbs[2] - 50);
+                                    ctx.lineTo(numbs[1] + 80, numbs[2] + 50);
+                                    ctx.lineTo(numbs[1] - 80, numbs[2] + 50);
+                                    ctx.lineTo(numbs[1] - 50, numbs[2] - 50);
+                                    ctx.stroke();
+                                    cell.innerHTML = numbs[0] + "." + "point of origion = (" + numbs[1] + "," + numbs[2] + ")";
+                                    break;
+                                case "Arcs:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, numbs[3], numbs[4], numbs[5], shapeStr);
+                                    numbs[1] = move;
+                                    ctx.beginPath();
+                                    ctx.arc(numbs[1], numbs[2], numbs[3], -(numbs[4] * Math.PI) / 180, (numbs[5] * Math.PI) / 180, true);
+                                    ctx.stroke();
+                                    cell.innerHTML = numbs[0] + "." + "Origion(" + numbs[1] + "," + numbs[2] + ")" + " Radius = " + numbs[3] + "Starting at:" + numbs[4] + " and Ending at:" + numbs[5];
+                                    break;
+                            }
+
+                        });
+
+                        $('#vert').change(function() {
+                            eraseIt(numbs[1], numbs[2]);
+                            var move = ((20 - parseInt($(this).val())) / 20) * 400;
+                            move = parseInt(move);
+                            switch (shapeStr) {
+                                case "Points:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    numbs[2] = move;
+                                    ctx.beginPath();
+                                    ctx.arc(numbs[1], numbs[2], 1, 0, 2 * Math.PI);
+                                    ctx.stroke();
+                                    clickedCell.innerHTML = numbs[0] + "." + "(" + numbs[1] + ", " + numbs[2] + ")";
+                                    break;
+                                case "Lines:":
+                                    eraseIt(numbs[1], numbs[2], numbs[3], numbs[4], 0, 0, 0, shapeStr);
+                                    var diff = move - numbs[2];
+                                    numbs[2] = move;
+                                    numbs[4] += diff;
+                                    ctx.beginPath();
+                                    ctx.moveTo(numbs[1], numbs[2]);
+                                    ctx.lineTo(numbs[3], numbs[4]);
+                                    ctx.stroke();
+                                    cell.innerHTML = numbs[0] + "." + "(" + numbs[1] + "," + numbs[2] + ")" + " to " + "(" + numbs[3] + "," + numbs[4] + ")";
+                                    break;
+                                case "Circles:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, numbs[3], 0, 0, shapeStr);
+                                    numbs[2] = move;
+                                    ctx.beginPath();
+                                    ctx.arc(numbs[1], numbs[2], numbs[3], 0, 2 * Math.PI);
+                                    ctx.stroke();
+                                    clickedCell.innerHTML = numbs[0] + "." + "origion(" + numbs[1] + "," + numbs[2] + ")" + " radius = " + numbs[3];
+                                    break;
+                                case "Triangles:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    numbs[2] = move;
+                                    ctx.beginPath();
+                                    ctx.moveTo(numbs[1], numbs[2] - 100);
+                                    ctx.lineTo(numbs[1] + 100, numbs[2] + 100);
+                                    ctx.lineTo(numbs[1] - 100, numbs[2] + 100);
+                                    ctx.lineTo(numbs[1], numbs[2] - 100);
+                                    ctx.stroke();
+                                    cell.innerHTML = numbs[0] + "." + "point of origion = (" + numbs[1] + "," + numbs[2] + ")";
+                                    break;
+                                case "Polygons:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    numbs[2] = move;
+                                    ctx.beginPath();
+                                    ctx.moveTo(numbs[1] - 50, numbs[2] - 50);
+                                    ctx.lineTo(numbs[1] + 50, numbs[2] - 50);
+                                    ctx.lineTo(numbs[1] + 80, numbs[2] + 50);
+                                    ctx.lineTo(numbs[1] - 80, numbs[2] + 50);
+                                    ctx.lineTo(numbs[1] - 50, numbs[2] - 50);
+                                    ctx.stroke();
+                                    clickedCell.innerHTML = numbs[0] + "." + "point of origion = (" + numbs[1] + "," + numbs[2] + ")";
+                                    break;
+                                case "Arcs:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, numbs[3], numbs[4], numbs[5], shapeStr);
+                                    numbs[2] = move;
+                                    ctx.beginPath();
+                                    ctx.arc(numbs[1], numbs[2], numbs[3], -(numbs[4] * Math.PI) / 180, (numbs[5] * Math.PI) / 180, true);
+                                    ctx.stroke();
+                                    clickedCell.innerHTML = numbs[0] + "." + "Origion(" + numbs[1] + "," + numbs[2] + ")" + " Radius = " + numbs[3] + "Starting at:" + numbs[4] + " and Ending at:" + numbs[5];
+                                    break;
+                            }
+                        });
+
+                        document.getElementById("up").onclick = function() {
+
+                            switch (shapeStr) {
+                                case "Points:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    if (numbs[2] != 0)
+                                        numbs[2]--;
+                                    drawFig(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "(" + numbs[1] + ", " + numbs[2] + ")";
+                                    break;
+                                case "Lines:":
+                                    eraseIt(numbs[1], numbs[2], numbs[3], numbs[4], 0, 0, 0, shapeStr);
+                                    //insert if here
+                                    numbs[2]--;
+                                    numbs[4]--;
+
+                                    drawFig(numbs[1], numbs[2], numbs[3], numbs[4], 0, 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "(" + numbs[1] + "," + numbs[2] + ")" + " to " + "(" + numbs[3] + "," + numbs[4] + ")";
+                                    break;
+                                case "Circles:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, numbs[3], 0, 0, shapeStr);
+                                    if (numbs[2] >= 0)
+                                        numbs[2]--;
+                                    drawFig(numbs[1], numbs[2], 0, 0, numbs[3], 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "origion(" + numbs[1] + "," + numbs[2] + ")" + " radius = " + numbs[3];
+                                    break;
+                                case "Triangles:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    if (numbs[2] >= 0)
+                                        numbs[2]--;
+                                    drawFig(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "point of origion = (" + numbs[1] + "," + numbs[2] + ")";
+                                    break;
+                                case "Polygons:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    if (numbs[2] >= 0)
+                                        numbs[2]--;
+                                    drawFig(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "point of origion = (" + numbs[1] + "," + numbs[2] + ")";
+                                    break;
+                                case "Arcs:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, numbs[3], numbs[4], numbs[5], shapeStr);
+                                    if (numbs[2] >= 0)
+                                        numbs[2]--;
+                                    drawFig(numbs[1], numbs[2], 0, 0, numbs[3], numbs[4], numbs[5], shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "Origion(" + numbs[1] + "," + numbs[2] + ")" + " Radius = " + numbs[3] + "Starting at:" + numbs[4] + " and Ending at:" + numbs[5];
+                                    break;
+                            }
+
+                        };
+
+                        document.getElementById("down").onclick = function() {
+                            switch (shapeStr) {
+                                case "Points:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    if (numbs[2] != 400)
+                                        numbs[2]++;
+                                    drawFig(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "(" + numbs[1] + ", " + numbs[2] + ")";
+                                    break;
+                                case "Lines:":
+                                    eraseIt(numbs[1], numbs[2], numbs[3], numbs[4], 0, 0, 0, shapeStr);
+                                    if (numbs[2] <= 400 && numbs[4] <= 400) {
+                                        numbs[2]++;
+                                        numbs[4]++;
+                                    }
+                                    drawFig(numbs[1], numbs[2], numbs[3], numbs[4], 0, 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "(" + numbs[1] + "," + numbs[2] + ")" + " to " + "(" + numbs[3] + "," + numbs[4] + ")";
+                                    break;
+                                case "Circles:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, numbs[3], 0, 0, shapeStr);
+                                    if (numbs[2] <= 400)
+                                        numbs[2]++;
+                                    drawFig(numbs[1], numbs[2], 0, 0, numbs[3], 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "origion(" + numbs[1] + "," + numbs[2] + ")" + " radius = " + numbs[3];
+                                    break;
+                                case "Triangles:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    if (numbs[2] <= 400)
+                                        numbs[2]++;
+                                    drawFig(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "point of origion = (" + numbs[1] + "," + numbs[2] + ")";
+                                    break;
+                                case "Polygons:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    if (numbs[2] <= 400)
+                                        numbs[2]++;
+                                    drawFig(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "point of origion = (" + numbs[1] + "," + numbs[2] + ")";
+                                    break;
+                                case "Arcs:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, numbs[3], numbs[4], numbs[5], shapeStr);
+                                    if (numbs[2] <= 400)
+                                        numbs[2]++;
+                                    drawFig(numbs[1], numbs[2], 0, 0, numbs[3], numbs[4], numbs[5], shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "Origion(" + numbs[1] + "," + numbs[2] + ")" + " Radius = " + numbs[3] + "Starting at:" + numbs[4] + " and Ending at:" + numbs[5];
+                                    break;
+                            }
+                        };
+
+                        document.getElementById("left").onclick = function() {
+                            switch (shapeStr) {
+                                case "Points:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    if (numbs[1] != 0)
+                                        numbs[1]--;
+                                    drawFig(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "(" + numbs[1] + ", " + numbs[2] + ")";
+                                    break;
+                                case "Lines:":
+                                    eraseIt(numbs[1], numbs[2], numbs[3], numbs[4], 0, 0, 0, shapeStr);
+                                    if (numbs[1] > 0 && numbs[3] > 0) {
+                                        numbs[1]--;
+                                        numbs[3]--;
+                                    }
+                                    drawFig(numbs[1], numbs[2], numbs[3], numbs[4], 0, 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "(" + numbs[1] + "," + numbs[2] + ")" + " to " + "(" + numbs[3] + "," + numbs[4] + ")";
+                                    break;
+                                case "Circles:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, numbs[3], 0, 0, shapeStr);
+                                    if (numbs[1] > 0)
+                                        numbs[1]--;
+                                    drawFig(numbs[1], numbs[2], 0, 0, numbs[3], 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "origion(" + numbs[1] + "," + numbs[2] + ")" + " radius = " + numbs[3];
+                                    break;
+                                case "Triangles:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    if (numbs[1] > 0)
+                                        numbs[1]--;
+                                    drawFig(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "point of origion = (" + numbs[1] + "," + numbs[2] + ")";
+                                    break;
+                                case "Polygons:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    if (numbs[1] > 0)
+                                        numbs[1]--;
+                                    drawFig(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "point of origion = (" + numbs[1] + "," + numbs[2] + ")";
+                                    break;
+                                case "Arcs:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, numbs[3], numbs[4], numbs[5], shapeStr);
+                                    if (numbs[1] > 0)
+                                        numbs[1]--;
+                                    drawFig(numbs[1], numbs[2], 0, 0, numbs[3], numbs[4], numbs[5], shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "Origion(" + numbs[1] + "," + numbs[2] + ")" + " Radius = " + numbs[3] + "Starting at:" + numbs[4] + " and Ending at:" + numbs[5];
+                                    break;
+                            }
+                        };
+
+                        document.getElementById("right").onclick = function() {
+                            switch (shapeStr) {
+                                case "Points:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    if (numbs[1] != 400)
+                                        numbs[1]++;
+                                    drawFig(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "(" + numbs[1] + ", " + numbs[2] + ")";
+                                    break;
+                                case "Lines:":
+                                    eraseIt(numbs[1], numbs[2], numbs[3], numbs[4], 0, 0, 0, shapeStr);
+                                    if (numbs[1] < 400 && numbs[3] < 400) {
+                                        numbs[1]++;
+                                        numbs[3]++;
+                                    }
+                                    drawFig(numbs[1], numbs[2], numbs[3], numbs[4], 0, 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "(" + numbs[1] + "," + numbs[2] + ")" + " to " + "(" + numbs[3] + "," + numbs[4] + ")";
+                                    break;
+                                case "Circles:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, numbs[3], 0, 0, shapeStr);
+                                    if (numbs[1] < 400)
+                                        numbs[1]++;
+                                    drawFig(numbs[1], numbs[2], 0, 0, numbs[3], 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "origion(" + numbs[1] + "," + numbs[2] + ")" + " radius = " + numbs[3];
+                                    break;
+                                case "Triangles:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    if (numbs[1] < 400)
+                                        numbs[1]++;
+                                    drawFig(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "point of origion = (" + numbs[1] + "," + numbs[2] + ")";
+                                    break;
+                                case "Polygons:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    if (numbs[1] < 400)
+                                        numbs[1]++;
+                                    drawFig(numbs[1], numbs[2], 0, 0, 0, 0, 0, shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "point of origion = (" + numbs[1] + "," + numbs[2] + ")";
+                                    break;
+                                case "Arcs:":
+                                    eraseIt(numbs[1], numbs[2], 0, 0, numbs[3], numbs[4], numbs[5], shapeStr);
+                                    if (numbs[1] < 400)
+                                        numbs[1]++;
+                                    drawFig(numbs[1], numbs[2], 0, 0, numbs[3], numbs[4], numbs[5], shapeStr);
+                                    clickedCell.innerHTML = numbs[0] + "." + "Origion(" + numbs[1] + "," + numbs[2] + ")" + " Radius = " + numbs[3] + "Starting at:" + numbs[4] + " and Ending at:" + numbs[5];
+                                    break;
+                            }
+                        };
+                    }
+                    //TURNS OFF ALL THE EVENT LISTENERS AFTER EDITING IS FINISHED
+                    document.getElementById("draw").innerHTML = "Done";
+                    var doneBut = document.getElementById("draw");
+                    doneBut.onclick = function() {
+                        $("#hor").off("change");
+                        $("#vert").off("change");
+                        $("#formStyle").off("change");
+                        $("#up").off("click");
+                        $("#down").off("click");
+                        $("#left").off("click");
+                        $("#right").off("click");
+                        $("#draw").html("Draw!!");
+                        doneBut.onclick = plot;
+                    };
+
+                };
+            }
+            //GETS THE POSITION OF THE MOUSE ON THE CANVAS
+            function getMousePos(canvas, evt) {
+                var rect = canvas.getBoundingClientRect();
+                return {
+                    x: evt.clientX - rect.left,
+                    y: evt.clientY - rect.top
+                };
+            }
+            function prep(event) {
+                Mouse = getMousePos(c, event);
+            }
+            //ERASES THE SHAPE AT A SPECIFIED POSITION
+            function eraseIt(x, y, eX, eY, r, anglS, anglE, form) {
+                ctx.strokeStyle = "white";
+                ctx.beginPath();
+
+
+                switch (form) {
+                    case "Points:":
+                        ctx.arc(x, y, 1, 0, 2 * Math.PI);
+                        for (var i = 0; i < 10; i++)
+                            ctx.stroke();
+                        break;
+                    case "Lines:":
+
+                        ctx.moveTo(x, y);
+                        ctx.lineTo(eX, eY);
+                        for (var i = 0; i < 10; i++)
+                            ctx.stroke();
+                        break;
+                    case "Circles:":
+                        ctx.arc(x, y, r, 0, 2 * Math.PI);
+                        for (var i = 0; i < 20; i++)
+                            ctx.stroke();
+                        break;
+                    case "Triangles:":
+                        ctx.moveTo(x, y - 100);
+                        ctx.lineTo(x + 100, y + 100);
+                        ctx.lineTo(x - 100, y + 100);
+                        ctx.lineTo(x, y - 100);
+                        for (var i = 0; i < 20; i++)
+                            ctx.stroke();
+                        break;
+                    case "Polygons:":
+                        ctx.moveTo(x - 50, y - 50);
+                        ctx.lineTo(x + 50, y - 50);
+                        ctx.lineTo(x + 80, y + 50);
+                        ctx.lineTo(x - 80, y + 50);
+                        ctx.lineTo(x - 50, y - 50);
+                        for (var i = 0; i < 20; i++)
+                            ctx.stroke();
+                        break;
+                    case "Arcs:":
+                        ctx.arc(x, y, r, -(anglS * Math.PI) / 180, (anglE * Math.PI) / 180, true);
+                        for (var i = 0; i < 20; i++)
+                            ctx.stroke();
+                        break;
+                }
+                ctx.strokeStyle = "black";
+            }
+            //SOME FUNCTIONS NEED FOR SHAPES TO BE REDRAWN..THIS IS MY FUNCTION TO HANDLE THAT
+            function drawFig(x, y, eX, eY, r, anglS, anglE, form) {
+                ctx.beginPath();
+                switch (form) {
+                    case "Points:":
+                        //alert(form);
+                        ctx.arc(x, y, 1, 0, 2 * Math.PI);
+
+                        break;
+                    case "Lines:":
+                        ctx.moveTo(x, y);
+                        ctx.lineTo(eX, eY);
+                        break;
+                    case "Circles:":
+                        ctx.arc(x, y, r, 0, 2 * Math.PI);
+                        break;
+                    case "Triangles:":
+                        ctx.moveTo(x, y - 100);
+                        ctx.lineTo(x + 100, y + 100);
+                        ctx.lineTo(x - 100, y + 100);
+                        ctx.lineTo(x, y - 100);
+                        break;
+                    case "Polygons:":
+                        ctx.moveTo(x - 50, y - 50);
+                        ctx.lineTo(x + 50, y - 50);
+                        ctx.lineTo(x + 80, y + 50);
+                        ctx.lineTo(x - 80, y + 50);
+                        ctx.lineTo(x - 50, y - 50);
+                        break;
+                    case "Arcs:":
+                        ctx.arc(x, y, r, -(anglS * Math.PI) / 180, (anglE * Math.PI) / 180, true);
+
+                        break;
+                }
+                ctx.stroke();
+            }
+            //FOR SETTING THE LINE DASHING
+            function setUpLineStyle(){
+                 var frmStl = document.getElementById("formStyle").value;
+                            switch (frmStl) {
+                                case "solid":
+                                    ctx.setLineDash([0]);
+                                    break;
+                                case "dot":
+                                    ctx.setLineDash([1]);
+                                    break;
+                                case "dash":
+                                    ctx.setLineDash([8, 2]);
+                                    break;
+                            }
+            }
+            
+            
+        </script>
+    </head>
+    <body>
+        <h3>I didn't have time to impress you with twitter bootstrap</h3>
+        <h4>But Im pretty proud of this graphing function.. all JS</h4>
+        <br>
+        <div id="upload"></div>
+        <br>
+        
+         <canvas id="myCanvas" width="400" height="400" onclick="prep(event)" style="border:1px solid #d3d3d3;">
+            Your browser does not support the canvas element</canvas>
+
+        <div id="gui">
+            <table>
+                <tr>
+                    <td>
+                        <label>Shape:</label>
+                        <select id="shape">
+                            <option value="point">Point</option>
+                            <option value="line">Line</option>
+                            <option value="circle">Circle</option>
+                            <option value="tri">Triangle</option>
+                            <option value="poly">Polygon</option>
+                            <option value="arc">Arc</option>
+                        </select>
+                    </td>
+                    <td>
+                        <label>Style:</label>
+                        <select id="formStyle">
+                            <option value="solid">Solid</option>
+                            <option value="dot">Dotted</option>
+                            <option value="dash">Dashed</option>
+                        </select>
+                    </td>
+                    <td>
+                        <table style="border: 1px solid #000">
+                            <tr>
+                                <td></td>
+                                <td><button id="up"><img alt="UP" src="up.gif"/></button></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td><button id="left"><img alt="LEFT" src="left.gif"/></button></td>
+                                <td><button id="draw" onclick="plot()">Draw!</button></td>
+                                <td><button id="right"><img alt="RIGHT" src="right.gif"/></button></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><button id="down"><img alt="DOWN" src="down.gif"/></button></td>
+                                <td></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td><table id="poi" style="border: 1px solid #000">
+                            <tr>
+                                <th>Points:</th>
+                            </tr>
+                        </table></td>
+                    <td>
+                        <table id="lin" style="border: 1px solid #000">
+                            <tr>
+                                <th>Lines:</th>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table id="cir" style="border: 1px solid #000">
+                            <tr>
+                                <th>Circles:</th>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <table id="tri" style="border: 1px solid #000">
+                            <tr>
+                                <th>Triangles:</th>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table id="pol" style="border: 1px solid #000">
+                            <tr>
+                                <th>Polygons:</th>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table id="arc" style="border: 1px solid #000">
+                            <tr>
+                                <th>Arcs:</th>
+                            </tr>
+                        </table>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+            <input id="vert" type="range" min="0" max="20" value="10" style="float: right;" disabled/>
+        </div>
+        <input id="hor" type="range" min="0" max="20" value="10" disabled/>
+        
+    </body>
+</html>

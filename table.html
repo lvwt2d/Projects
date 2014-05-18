@@ -1,0 +1,141 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="jquery-1.10.2.js"></script>
+        <script src="jquery-ui.js"></script>
+        <script src="jquery.tablednd.js"></script>
+        
+        <script>
+            //I disabled prompts from the page so no alerts
+            //oops
+                        alert("yea");
+                        var lastSelection = null;
+                        var nSwaps = 0;
+                        var numSwaps;
+
+            $(document).ready(function(){
+              $("td").click(function(){
+                  onclickCell();
+              });
+            }
+            );
+               function onclickCell()
+{
+  var e, c;
+  
+  // Do not accept clicks if there's been a winner.
+  if (winnerText.innerText != "") {
+    window.event.cancelBubble = true;
+	return;
+  }
+  
+  e = window.event.srcElement;
+  c = findCell(e);
+
+  if (c != null) {
+    if (lastSelection == null) {
+      selectCell(c);
+      lastSelection = c;
+	}
+	else {
+	  if (c == lastSelection) {
+	   // deselectCell(lastSelection);
+	  }
+	  else {
+	    c.swapNode(lastSelection);
+        //deselectCell(lastSelection);
+	    nSwaps += 1;
+	    numSwaps.innerText = nSwaps;
+	  }
+	  lastSelection = null;
+    }
+  }
+  window.event.cancelBubble = true;
+}  
+
+
+               function findCell(e)
+{
+  if (e.tagName == "TD") {
+    return e;
+  }
+  else if (e.tagName == "BODY") {
+    return null;
+  }
+  else {
+    return findCell(e.parentElement);
+  }
+}
+
+             
+               
+            
+            
+            
+            function allowDrop(ev)
+            {
+                 ev.preventDefault();
+            }
+
+            function drag(ev)
+            {
+                ev.dataTransfer.setData("Text",ev.target.id);
+                $(this).prev().attr({
+                    "ondrop" : "notta()",
+                    "ondragover" : "notta()"
+                });
+               // alert("jquery works");
+            }
+
+            function drop(ev)
+            {
+                ev.preventDefault();
+                var data = ev.dataTransfer.getData("Text");
+                ev.target.appendChild(document.getElementById(data));
+            }
+            
+            function notta(){
+                alert("notta called drop prevented");
+            }
+            
+        </script>
+    </head>
+    <body>
+        
+        <div>TODO write content</div>
+        <table id="draggable" border="1">
+            <tr>
+                <td id="l">Lamar</td>
+                <td id="wo">Woods</td>
+                <td id="aw">awesome</td>
+                <td id="work">hard work</td>
+            </tr>
+            <tr>
+                <td id="gt">greatness</td>
+                <td id="per">perseverance</td>
+                <td id="deter">determination</td>
+                <td id="money">money</td>
+            </tr>
+            <tr>
+                <td id="y">yacht</td>
+                <td id="slam">slam</td>
+                <td id="eclipse">eclipse</td>
+                <td id="milli">millionare</td>
+            </tr>
+            <tr>
+                <td id="dropper"></td>
+                <td>san1</td>
+                <td>er2</td>
+                <td>yi1</td>
+            </tr>
+        </table>
+        <br>
+        <div id="ans" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+    </body>
+</html>

@@ -1,0 +1,29 @@
+/* 
+    Document   : gui
+    Created on : Sep 17, 2013, 9:05:04 PM
+    Author     : Lamar
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+root { 
+    display: block;
+}
+#gui {
+    background-color: goldenrod;
+    width: 400px;
+}
+td {
+    text-align: center;
+}
+#vert {
+    -webkit-transform:rotate(90deg);
+    position: relative;
+    left: 80px;
+    top: -60px;
+}
+#hor {
+    -webkit-transform: rotate(180deg);
+    position: relative;
+    left: 100px;
+}

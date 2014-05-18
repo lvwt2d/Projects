@@ -1,0 +1,21 @@
+/* 
+    Document   : table
+    Created on : Sep 4, 2013, 10:42:51 AM
+    Author     : Lamar
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+root { 
+    display: block;
+}
+
+table{
+    border: 2px inset;
+    border-color: goldenrod;
+}
+td {
+    width: 30px;
+    height: 25px;
+}
+

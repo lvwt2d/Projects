@@ -1,0 +1,166 @@
+<!--
+Origionally this was a project from wenjie on making a drag and drop
+game for the website but I ran into so many problems that I endend up
+using clicks instead of d and d. Functioning example:speedd.html on admiral
+I will come back and use the html5 draggable attribute to put this to bed.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" type="text/css" href="table.css"/>
+        <script src="jquery-1.10.2.js"></script>
+        <script src="jquery-ui.js"></script>
+        <script>
+            
+            $(document).ready(function(){
+                var drowind;
+                var dcelind;
+                //makes all cells draggable
+                //swapping draggable and droppable
+               $('#dropper').droppable({
+                   
+                   //during creation,make draggables
+                   create: function(event,ui){
+                   $(this).next().draggable({
+                       revert: "invalid",
+                       drag: function(){
+                           $(this).css("color","blue");
+                           
+                           
+                       },
+                       start: function(){
+                            var r = $(this).parent();
+                           drowind = $(this).parent().parent().children().index(r);
+                           dcelind = $(this).parent().children().index(this);
+                           alert("row index:" + drowind);
+                           alert("cell index:" + dcelind);
+                               },
+                                refreshPositions: true  
+                   });
+                   $(this).prev().draggable({
+                        revert: "invalid",
+                       drag: function(){
+                           $(this).css("color","blue");
+                       },
+                        start: function(){
+                            var r = $(this).parent();
+                           drowind = $(this).parent().parent().children().index(r);
+                           dcelind = $(this).parent().children().index(this);
+                           alert(drowind);
+                               }
+                   });
+                   
+                   //gives the index of this td for finding cells above and below
+                   var ind=$(this).parent().children().index(this);
+                   //top cell
+                   $(this).parent().prev().children().eq(ind).draggable({
+                       revert: "invalid",
+                       drag: function(){
+                           $(this).css("color","blue");
+                       },
+                                start: function(){
+                            var r = $(this).parent();
+                           drowind = $(this).parent().parent().children().index(r);
+                           dcelind = $(this).parent().children().index(this);
+                           alert(drowind);
+                           alert("cell index:" + dcelind);
+                               } 
+                   });
+                   $(this).parent().next().children().eq(ind).draggable({
+                   revert: "invalid",
+                           drag: function(){
+                           $(this).css("color","blue");
+                            },
+                            start: function(){
+                            var r = $(this).parent();
+                           drowind = $(this).parent().parent().children().index(r);
+                           dcelind = $(this).parent().children().index(this);
+                           alert(drowind);
+                               }
+                    });
+                    
+                   },
+                   drop: function(){
+                   //malfunction
+                   /*
+                   var node = document.getElementById("draggable").childnodes[drowind].childnodes[dcelind].cloneNode();
+                   var tabr = document.body.tab.childnodes[drowind];
+                   tabr.replaceChild(document.getElementById("dropper"),node);
+                   */
+                  //trying to replace the dragged cell with the blank cell
+                  // $("#draggable").children().eq(drowind).children().eq(dcelind).replaceWith($(this).clone());
+                  // alert("functional");
+                  //You can clone cells and replace children or just reset their html and attributes
+                  /*$("#draggable").children().get(drowind).children().get(dcelind).replaceWith(function(){
+                      return $(this).clone(true);
+                  });*/
+                  //var $rows = $("#draggable").children();
+                  //var $cObj = $rows[drowind][dcelind];
+                  //var $cellC = $("#draggable").children().eq(drowind).children().eq(dcelind).clone(true);
+                  var dClone = $("#draggable").find("td").toArray();
+                  var ddclone = dClone[(drowind * 4) + dcelind];
+                  var temps;
+                          temps = $("tr").toArray();
+                          //temps[drowind] works and is the row of dragged cell
+                  var tempkids;
+                  tempkids = temps[drowind];
+                          alert("yo momma son");
+                  ddclone.id = "dropper";
+                  //var temps2 = $temps.children().html();
+                  //var tmp = $tempO.children().eq(dcelind).html();
+                  //$(this).html(function(){
+                      
+                   //   return tmp ;
+                  //});
+                  //$($cell).css("color","green");
+                  //$cell.attr("id","dropper");
+                  $(this).attr("id","Used");
+                  //alert("tempObj's html" + $tempO.html);
+                  //work darniT!!!!
+                  //$(this).replaceWith(function(){
+                  //    return $cellC;
+                  //});
+                  //$cellC.replaceWith(function(){
+                  //    return $dClone;
+                  //});
+                  alert(this.id);
+                  alert(tempkids.innerHTML);
+                  
+                  
+                   }
+               });
+           });
+            
+        </script>
+    </head>
+    <body>
+        <table id="draggable" border="1">
+            <tr>
+                <td id="l">Lamar</td>
+                <td id="wo">Woods</td>
+                <td id="aw">awesome</td>
+                <td id="work">hard work</td>
+            </tr>
+            <tr>
+                <td id="gt">greatness</td>
+                <td id="per">perseverance</td>
+                <td id="deter">determination</td>
+                <td id="money">money</td>
+            </tr>
+            <tr>
+                <td id="y">yacht</td>
+                <td id="slam">slam</td>
+                <td id="eclipse">eclipse</td>
+                <td id="milli">millionare</td>
+            </tr>
+            <tr>
+                <td id="dropper"></td>
+                <td>san1</td>
+                <td>er2</td>
+                <td>yi1</td>
+            </tr>
+        </table>
+    </body>
+</html>
